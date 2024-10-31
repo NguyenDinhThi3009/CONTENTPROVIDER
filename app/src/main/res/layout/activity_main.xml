@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/LinearLayout1"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp"
+    tools:context=".MainActivity">
+    <TextView
+        android:id="@+id/txtStudentName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Tên: Nguyễn Đình Thi"
+        android:textSize="18sp"
+        android:paddingBottom="8dp" />
+    <TextView
+        android:id="@+id/txtStudentID"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Mã sinh viên: 22115053122137"
+        android:textSize="18sp"
+        android:paddingBottom="36dp" />
+    <Button
+        android:id="@+id/btnShowSMS"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Read SMS" />
+</LinearLayout>
