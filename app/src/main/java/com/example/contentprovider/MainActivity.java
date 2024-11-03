@@ -1,84 +1,81 @@
 package com.example.contentprovider;
 
-import android.Manifest;
-import android.annotation.SuppressLint;
-import android.content.Intent;
-import android.database.Cursor;
-import android.os.Bundle;
-import android.provider.Telephony;
-import android.app.Activity;
 import android.content.pm.PackageManager;
-import android.view.Menu;
-import android.view.View;
-import android.view.View.OnClickListener;
-import android.widget.Button;
+import android.database.Cursor;
+import android.net.Uri;
+import android.os.Bundle;
 import android.widget.Toast;
+import android.Manifest;
+import androidx.activity.EdgeToEdge;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import java.util.ArrayList;
+import java.util.List;
 
-public class MainActivity extends Activity implements OnClickListener {
+public class MainActivity extends AppCompatActivity {
 
-    Button btnShowSMS; // Nút để truy cập SMS
+    private static final int PERMISSION_REQUEST_READ_SMS = 1;
+    private RecyclerView recyclerView;
+    private MessagesAdapter adapter;
+    private List<Message> messageList;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
+            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
+            return insets;
+        });
 
-        btnShowSMS = findViewById(R.id.btnShowSMS);
-        btnShowSMS.setOnClickListener(this);
+        recyclerView = findViewById(R.id.recyclerViewMessages);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-        // Kiểm tra và yêu cầu quyền truy cập SMS
-        if (checkSelfPermission(Manifest.permission.READ_SMS) != PackageManager.PERMISSION_GRANTED) {
-            requestPermissions(new String[]{Manifest.permission.READ_SMS}, 1);
-        }
-    }
-    @SuppressLint("ResourceType")
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.layout.activity_main, menu);
-        return true;
-    }
-    @Override
-    public void onClick(View v) {
-        if (v == btnShowSMS) {
-            accessSMS(); // Gọi hàm để đọc SMS
-        }
-    }
-    public void accessSMS() {
-        String[] projection = new String[]{
-                Telephony.Sms.ADDRESS,
-                Telephony.Sms.BODY,
-                Telephony.Sms.DATE
-        };
-        Cursor c = getContentResolver().query(
-                Telephony.Sms.CONTENT_URI,
-                projection,
-                null, null,
-                Telephony.Sms.DATE + " DESC"
-        );
-        if (c != null && c.moveToFirst()) {
-            ArrayList<String> smsList = new ArrayList<>();
-            do {
-                @SuppressLint("Range") String address = c.getString(c.getColumnIndex(Telephony.Sms.ADDRESS));
-                @SuppressLint("Range") String body = c.getString(c.getColumnIndex(Telephony.Sms.BODY));
-                @SuppressLint("Range") String date = c.getString(c.getColumnIndex(Telephony.Sms.DATE));
+        messageList = new ArrayList<>();
+        adapter = new MessagesAdapter(messageList);
+        recyclerView.setAdapter(adapter);
 
-                smsList.add("From: " + address + "\n" + "Message: " + body + "\n" + "Date: " + date + "\n");
-            } while (c.moveToNext());
-            c.close();
-
-            Intent intent = new Intent(this, ShowAllContactActivity.class);
-            intent.putStringArrayListExtra("smsList", smsList);
-            startActivity(intent);
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_SMS) == PackageManager.PERMISSION_GRANTED) {
+            readSmsMessages();
         } else {
-            Toast.makeText(this, "No SMS found", Toast.LENGTH_SHORT).show();
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_SMS}, PERMISSION_REQUEST_READ_SMS);
         }
     }
+
+    private void readSmsMessages() {
+        Uri smsUri = Uri.parse("content://sms/inbox");
+        Cursor cursor = getContentResolver().query(smsUri, null, null, null, null);
+
+        if (cursor != null) {
+            int addressColumn = cursor.getColumnIndex("address");
+            int bodyColumn = cursor.getColumnIndex("body");
+
+            while (cursor.moveToNext()) {
+                String address = cursor.getString(addressColumn);
+                String body = cursor.getString(bodyColumn);
+                messageList.add(new Message(address, body));
+            }
+            cursor.close();
+            adapter.notifyDataSetChanged();
+        }
+    }
+
     @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == 1) {
+        if (requestCode == PERMISSION_REQUEST_READ_SMS) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                Toast.makeText(this, "Permission granted", Toast.LENGTH_SHORT).show();
+                readSmsMessages();
             } else {
                 Toast.makeText(this, "Permission denied", Toast.LENGTH_SHORT).show();
             }

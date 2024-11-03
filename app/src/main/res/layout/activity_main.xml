@@ -1,29 +1,32 @@
-<?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/LinearLayout1"
+    android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    tools:context=".MainActivity"
     android:orientation="vertical"
-    android:padding="16dp"
-    tools:context=".MainActivity">
+    android:padding="10dp">
+
     <TextView
-        android:id="@+id/txtStudentName"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Tên: Nguyễn Đình Thi"
-        android:textSize="18sp"
-        android:paddingBottom="8dp" />
-    <TextView
-        android:id="@+id/txtStudentID"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Mã sinh viên: 22115053122137"
-        android:textSize="18sp"
-        android:paddingBottom="36dp" />
-    <Button
-        android:id="@+id/btnShowSMS"
+        android:background="#ff0000"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Read SMS" />
+        android:text="Nguyễn Đình Thi"
+        android:textSize="22dp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:background="#ff0000"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="22115053122137"
+        android:textSize="22dp"
+        android:textStyle="bold"
+        android:paddingBottom="10dp"/>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerViewMessages"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
 </LinearLayout>
